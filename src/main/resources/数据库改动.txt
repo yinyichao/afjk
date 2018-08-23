@@ -1,0 +1,176 @@
+1、2017年8月30日
+sec_service表中type字段从int改为varchar(30)
+2、2017年9月1日
+plant_factory表中type字段从int改为varchar(10)
+3、2017年9月1日
+sec_standard表中type字段从int改为varchar(10)
+3、2017年9月5日
+PLANT_TEL表添加status integer not null
+			code VARCHAR(32)
+			in_time DATETIME YEAR TO SECOND
+			region_id VARCHAR(32) NOT NULL,改为非空
+			pid VARCHAR(32) NOT NULL,改为非空
+        	fid VARCHAR(32) NOT NULL,改为非空
+plant_perimeter表 status INTEGER NOT NULL,改为int 非空
+			region_id VARCHAR(32) NOT NULL,改为非空
+			pid VARCHAR(32) NOT NULL,改为非空
+        	fid VARCHAR(32) NOT NULL,改为非空
+plant_meeting表 status INTEGER NOT NULL,改为int 非空
+			region_id VARCHAR(32) NOT NULL,改为非空
+			pid VARCHAR(32) NOT NULL,改为非空
+        	fid VARCHAR(32) NOT NULL,改为非空
+plant_life表 status INTEGER NOT NULL,改为int 非空
+			region_id VARCHAR(32) NOT NULL,改为非空
+			pid VARCHAR(32) NOT NULL,改为非空
+        	fid VARCHAR(32) NOT NULL,改为非空
+plant_ewire表添加 code VARCHAR(32)
+			in_time DATETIME YEAR TO SECOND
+			status INTEGER NOT NULL,改为int 非空
+			region_id VARCHAR(32) NOT NULL,改为非空
+			pid VARCHAR(32) NOT NULL,改为非空
+        	fid VARCHAR(32) NOT NULL,改为非空
+plant_door表 status INTEGER NOT NULL,改为int 非空
+			region_id VARCHAR(32) NOT NULL,改为非空
+			pid VARCHAR(32) NOT NULL,改为非空
+        	fid VARCHAR(32) NOT NULL,改为非空
+plant_phone表 status INTEGER NOT NULL,改为int 非空
+			region_id VARCHAR(32) NOT NULL,改为非空
+			pid VARCHAR(32) NOT NULL,改为非空
+        	fid VARCHAR(32) NOT NULL,改为非空
+plant_factory 加入port VARCHAR(10)
+
+
+2017-09-20
+CREATE TABLE
+    plant_perimeter_ip
+    (
+        ip VARCHAR(32) NOT NULL,
+        code VARCHAR(32)
+    );
+CREATE VIEW
+    v_sec_in_basic
+    (
+        code,
+        COUNT,
+        type,
+        status
+    ) AS
+SELECT
+    SUBSTR (x1.code ,0 ,2 ),
+    COUNT(x0.id ) ,
+    '01' ,
+    x0.status
+FROM
+    ("informix".plant_perimeter x0
+JOIN
+    "informix".plant_perimeter_region x1
+ON
+    (
+        x0.region_id = x1.id ) )
+GROUP BY
+    x1.code ,
+    x0.status
+UNION
+SELECT
+    SUBSTR (x3.code ,0 ,2 ),
+    COUNT(x2.id ) ,
+    '02' ,
+    x2.status
+FROM
+    ("informix".plant_tel x2
+JOIN
+    "informix".plant_perimeter_region x3
+ON
+    (
+        x2.region_id = x3.id ) )
+GROUP BY
+    x3.code ,
+    x2.status
+UNION
+SELECT
+    SUBSTR (x5.code ,0 ,2 ),
+    COUNT(x4.id ) ,
+    '03' ,
+    x4.status
+FROM
+    ("informix".plant_door x4
+JOIN
+    "informix".plant_perimeter_region x5
+ON
+    (
+        x4.region_id = x5.id ) )
+GROUP BY
+    x5.code ,
+    x4.status
+UNION
+SELECT
+    SUBSTR (x7.code ,0 ,2 ),
+    COUNT(x6.id ) ,
+    '04' ,
+    x6.status
+FROM
+    ("informix".plant_ewire x6
+JOIN
+    "informix".plant_perimeter_region x7
+ON
+    (
+        x6.region_id = x7.id ) )
+GROUP BY
+    x7.code ,
+    x6.status
+UNION
+SELECT
+    SUBSTR (x9.code ,0 ,2 ),
+    COUNT(x8.id ) ,
+    '05' ,
+    x8.status
+FROM
+    ("informix".plant_meeting x8
+JOIN
+    "informix".plant_perimeter_region x9
+ON
+    (
+        x8.region_id = x9.id ) )
+GROUP BY
+    x9.code ,
+    x8.status
+UNION
+SELECT
+    SUBSTR (x11.code ,0 ,2 ),
+    COUNT(x10.id ) ,
+    '06' ,
+    x10.status
+FROM
+    ("informix".plant_life x10
+JOIN
+    "informix".plant_perimeter_region x11
+ON
+    (
+        x10.region_id = x11.id ) )
+GROUP BY
+    x11.code ,
+    x10.status
+UNION
+SELECT
+    SUBSTR (x13.code ,0 ,2 ),
+    COUNT(x12.id ) ,
+    '07' ,
+    x12.status
+FROM
+    ("informix".plant_phone x12
+JOIN
+    "informix".plant_perimeter_region x13
+ON
+    (
+        x12.region_id = x13.id ) )
+GROUP BY
+    x13.code ,
+    x12.status ;      
+ 
+2017-10-24
+修改plant_ewire   
+将BigInt改为 
+     highvalue1 FLOAT,
+        highvalue2 FLOAT,
+        lowvalue1 FLOAT,
+        lowvalue2 FLOAT,                                                     ;

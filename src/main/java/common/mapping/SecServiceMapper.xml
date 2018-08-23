@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="common.mapper.SecServiceMapper">
+	<!-- 各个监狱各设备数量 -->
+	<select id="findAllSecCount" parameterType="String" resultType="common.model.SecManagement">
+		select name,code,
+		sum(case type when '01' then count else 0 end)video,
+		sum(case type when '02' then count else 0 end)ware,
+		sum(case type when '03' then count else 0 end)door,
+		sum(case type when '04' then count else 0 end)grid,
+		sum(case type when '05' then count else 0 end)meeting,
+		sum(case type when '06' then count else 0 end)living,
+		sum(case type when '07' then count else 0 end)shield 
+		from (select p.code,p.name,count(s.id) as count,s.type from sec_service s
+		inner join (select name,code from plant_dict where type=1 
+		<if test="code!=null">
+			and code = #{code}
+		</if>
+		) p on s.prison=p.code
+		group by s.type,p.name,p.code) group by name,code
+	</select>
+	<!-- 查找个监狱的设备的详细信息 -->
+	<select id="findSecInfor" parameterType="common.model.SecService" resultType="common.model.SecService">
+		select id,name from sec_service where type = #{type} and prison = #{prison}
+	</select>
+	<!-- id查找设备信息  -->
+	<select id="findSecById" parameterType="String" resultType="common.model.SecService">
+		select * from sec_service where id = #{id}
+	</select>
+</mapper>

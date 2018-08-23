@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="common.mapper.PlantPerimeterRegionMapper">
+  	<insert id="insertRegion" parameterType="common.model.PlantPerimeterRegion">
+  	<selectKey keyProperty="id" resultType="String" order="BEFORE">
+  		select nvl(max(TO_NUMBER(id)),0)+1 from plant_perimeter_region
+  	</selectKey>
+  		insert into plant_perimeter_region(id,name,code,remarks,parent_id,region_level,source) 
+  		values(#{id},#{name},#{code},#{remarks},#{parentId},#{regionLevel},#{source})
+  	</insert>
+  	<select id="selectByCode" parameterType="String" resultType="common.model.PlantPerimeterRegion">
+  		select * from plant_perimeter_region where substr(code,0,2) = #{code}
+  	</select>
+  	
+	
+	<select id="selectDiagramRoot" parameterType="String" resultType="String">
+  		select name from cmd_region where code = #{code}
+  	</select>
+  	<select id="selectDiagramNodes" parameterType="String" resultType="common.model.DiagramNodesDTO">
+  		select r.name,nvl(l.perimeter,0)perimeter,nvl(l.tel,0)tel,nvl(l.ewire,0)ewire,nvl(l.door,0)door,nvl(l.phone,0)phone,nvl(l.life,0)life from (select code,sum(case type when 1 then count else 0 end)perimeter,
+		sum(case type when 2 then count else 0 end)tel,
+		sum(case type when 3 then count else 0 end)ewire,
+		sum(case type when 4 then count else 0 end)door,
+		sum(case type when 5 then count else 0 end)phone,
+		sum(case type when 6 then count else 0 end)life from 
+(select code,count(code) as count,1 as type from( select substr(remark,3,2) as code from plant_perimeter ) group by code
+union
+select code,count(code) as count,2 as type from( select substr(code,3,2) as code from plant_tel ) group by code
+union
+select code,count(code) as count,3 as type from( select substr(code,3,2) as code from plant_ewire ) group by code
+union
+select code,count(code) as count,4 as type from( select substr(code,3,2) as code from plant_door ) group by code
+union
+select code,count(code) as count,5 as type from( select substr(code,3,2) as code from plant_phone ) group by code
+union
+select code,count(code) as count,6 as type from( select substr(code,3,2) as code from plant_life ) group by code) group by code) l right join 
+(select name,substr(code,3,2) as code from cmd_region where code like concat(#{code},'__')) r on l.code = r.code
+  	</select>
+</mapper>

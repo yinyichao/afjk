@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="common.mapper.PlantPerimeterMapper">
+    <!-- 摄像机概览 -->
+    <select id="findCameraView" resultType="common.model.View" parameterType="common.model.Pager">
+        SELECT SKIP #{skip} FIRST #{pageSize}
+        p.remark as code,p.id,p.in_time as inTime,p.name,p.fid as fid,j.name as jname,p.status,nvl(y.count,0) as
+        count,f.name as fname,r.name as pname
+        from plant_perimeter p
+        left join (select equipment_code,count(equipment_code)as count from yj_police group by equipment_code) y
+        on p.code=y.equipment_code
+        inner join plant_factory f on p.fid=f.id
+        inner join plant_perimeter_region r on p.region_id = r.id
+        inner join jy j on p.pid = j.id
+        <if test="params != null and params != '' ">
+            <where>
+                <if test="params.code != null and params.code != '' ">
+                    substr(r.code,0,2) = #{params.code}
+                </if>
+                <if test="params.key != null and params.key != '' ">
+                    <bind name="pattern" value="'%' + params.key + '%'"/>
+                    and p.name like #{pattern} or j.name like #{pattern}
+                </if>
+            </where>
+        </if>
+    </select>
+    <!-- 所有摄像机数量 -->
+    <select id="findAllCameraCount" resultType="int" parameterType="common.model.Pager">
+        select count(*) from plant_perimeter p inner join plant_perimeter_region r on p.region_id = r.id inner join jy j
+        on p.pid = j.id
+        <if test="params != null and params != '' ">
+            <where>
+                1 = 1
+                <if test="params.status != null and params.status != '' ">
+                    and p.status = #{params.status}
+                </if>
+                <if test="params.code != null and params.code != '' ">
+                    and substr(r.code,0,2) = #{params.code}
+                </if>
+                <if test="params.key != null and params.key != '' ">
+                    <bind name="pattern" value="'%' + params.key + '%'"/>
+                    and (p.name like #{pattern} or j.name like #{pattern})
+                </if>
+            </where>
+        </if>
+    </select>
+    <!-- 删除摄像机 -->
+    <delete id="delCamera" parameterType="int">
+        delete from plant_perimeter where id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <!-- 插入摄像机 -->
+    <insert id="insertCamera" parameterType="common.model.PlantPerimeter">
+        <selectKey keyProperty="id" resultType="String" order="BEFORE">
+            select nvl(max(TO_NUMBER(id)),0)+1 from plant_perimeter
+        </selectKey>
+        insert into plant_perimeter(id,name,code,status,region_id,pid,fid,in_time)
+        values(#{id},#{name},#{code},#{status},#{regionId},#{pid},#{fid},#{inTime})
+    </insert>
+    <!-- 按id查找摄像机信息 -->
+    <select id="findCameraById" parameterType="int" resultType="common.model.PlantPerimeter">
+    	SELECT *,region_id as regionId from plant_perimeter  where id = #{id}
+    </select>
+    <select id="findCodeByRemark" parameterType="String" resultType="String">
+    	select code from plant_perimeter where remark = #{code}
+    </select>
+    <select id="findNameByRemark" parameterType="String" resultType="String">
+    	select name from plant_perimeter where remark = #{code}
+    </select>
+    <select id="findAddressUrlByRemark" parameterType="String" resultType="String">
+    	select address_url from plant_perimeter where remark = #{code}
+    </select>
+    <select id="findNameByCode" parameterType="String" resultType="String">
+    	select name from plant_perimeter where code = #{code}
+    </select>
+    <select id="findAddressUrlByCode" parameterType="String" resultType="String">
+    	select address_url from plant_perimeter where code = #{code}
+    </select>
+    <!-- 修改摄像机数据 -->
+    <update id="updateCamera" parameterType="common.model.PlantPerimeter">
+    	update plant_perimeter 
+    	set name=#{name},status=#{status},fid=#{fid},pid=#{pid},in_time=#{inTime},code=#{code},region_id=#{regionId} 
+    	where id=#{id}
+    </update>
+</mapper>

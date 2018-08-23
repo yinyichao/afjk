@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="common.mapper.VSecInMapper">
+    
+	<select id="findByType" resultType="int" parameterType="String">
+		SELECT 
+			count
+		FROM v_sec_in where type = #{type} order by code
+	</select>
+	
+</mapper>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="common.mapper.PlantDictMapper">
+    <select id="findPlantDictByType" parameterType="int" resultType="common.model.PlantDict">
+		select * from plant_dict where type = #{type}
+	</select>
+    <!-- 按code类型查找设备名称 -->
+    <select id="findPlantDictByCode" parameterType="String" resultType="common.model.PlantDict">
+		select * from plant_dict where type = 3 and code = #{code}
+	</select>
+</mapper>

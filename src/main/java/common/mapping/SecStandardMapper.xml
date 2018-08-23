@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="common.mapper.SecStandardMapper">
+  <!--厂商信息二级页  -->
+   <select id="plantFactoryInfoSecond" parameterType="String" resultType="common.model.SecStandard">
+   		select * from sec_standard where type = #{code};
+   </select>
+   <!--厂商描述 -->
+   <select id="plantFactoryDescription" parameterType="int" resultType="common.model.SecStandard">
+   	    select * from sec_standard where id = #{id};
+   </select>
+</mapper>

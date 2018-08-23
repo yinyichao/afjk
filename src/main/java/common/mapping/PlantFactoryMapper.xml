@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="common.mapper.PlantFactoryMapper">
+    <!-- 查询厂家集合 -->
+    <select id="findAllFactory" resultType="common.model.PlantFactory">
+		select * from plant_factory
+	</select>
+
+    <!-- 查询厂商集合  -->
+    <select id="findAllPlantFactory" parameterType="common.model.Pager" resultType="common.model.PlantFactoryExt">
+		select SKIP #{skip} FIRST #{pageSize}
+		pfd.id as id,pfd.name as name,pfd.url as url,pfd.username as username,
+		pfd.password as password,pd.name as prison,pfd.tName as tName,pfd.in_time as in_time 
+		from(select pf.id as id,pf.name as name,pf.url as url,pf.username as username,
+		pf.password as password,pf.prison as prison,pd.name as tName,pf.in_time as in_time 
+		from plant_factory pf inner join plant_dict pd on pd.code = pf.type where pd.type = 3)  pfd 
+		inner join plant_dict pd on pd.code = pfd.prison where pd.type = 1
+	</select>
+
+    <!-- 查询厂商总记录数  -->
+    <select id="getPlantFactoryCount" resultType="int">
+		select count(*) 
+		from plant_factory pf inner join plant_dict pd 
+		on pf.type = pd.code
+		where pd.type = 3
+	</select>
+
+    <!-- 查询厂商所需数据  -->
+    <select id="findPlantFactoryData" parameterType="String" resultType="common.model.PlantFactory">
+		select * from plant_factory where type = '01' and prison =#{code}
+	</select>
+
+    <!-- 添加厂商 -->
+    <insert id="insertFactory" parameterType="common.model.PlantFactory">
+        <selectKey keyProperty="id" resultType="String" order="BEFORE">
+            select nvl(max(TO_NUMBER(id)),0)+1 from plant_factory
+        </selectKey>
+        insert into plant_factory values(#{id},#{name},#{url},#{username},#{password},#{prison},
+        #{type},#{inTime},#{port})
+    </insert>
+
+    <!--批量删除  -->
+    <delete id="delFactory" parameterType="int">
+        delete from plant_factory where id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 修改厂商回显 -->
+    <select id="findFactoryById" parameterType="int" resultType="common.model.PlantFactory">
+		select * from plant_factory where id = #{id}
+	</select>
+
+    <!-- 修改厂商 -->
+    <update id="updateFactoryById" parameterType="common.model.PlantFactory">
+		update plant_factory set name = #{name},url = #{url},username=#{username},
+		password=#{password},prison = #{prison},type = #{type},in_time=#{inTime}
+		where id = #{id}
+	</update>
+</mapper>

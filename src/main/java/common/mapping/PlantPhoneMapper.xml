@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="common.mapper.PlantPhoneMapper">
+ <!-- 手机屏蔽概览 -->
+	<select id="findPhoneView" resultType="common.model.View" parameterType="common.model.Pager">
+		SELECT SKIP #{skip} FIRST #{pageSize} 
+		p.code,p.id,p.in_time as inTime,p.name,p.fid as fid,j.name as jname,p.status,nvl(y.count,0) as count,f.name as fname,r.name as pname  
+		from plant_phone p 
+		left join (select equipment_code,count(equipment_code)as count from yj_police group by equipment_code) y
+		on p.code=y.equipment_code
+		inner join plant_factory f on p.fid=f.id 
+		inner join plant_perimeter_region r on p.region_id = r.id
+		inner join jy j on p.pid = j.id
+		<if test="params != null and params != '' ">
+			<where>
+				<if test="params.code != null and params.code != '' ">
+					substr(r.code,0,2) = #{params.code}
+				</if>
+				<if test="params.key != null and params.key != '' ">
+				<bind name="pattern" value="'%' + params.key + '%'" />
+					and p.name like #{pattern} or j.name like #{pattern}
+				</if>
+			</where>
+		</if>
+	</select>
+	<!-- 所有手机屏蔽数量 -->
+	<select id="findAllPhoneCount" resultType="int" parameterType="common.model.Pager">
+		select count(*) from  plant_phone p inner join plant_perimeter_region r on p.region_id = r.id inner join jy j on p.pid = j.id
+		<if test="params != null and params != '' ">
+			<where>
+				1 = 1
+				<if test="params.status != null and params.status != '' ">
+					and p.status = #{params.status}
+				</if>
+				<if test="params.code != null and params.code != '' ">
+					and substr(r.code,0,2) = #{params.code}
+				</if>
+				<if test="params.key != null and params.key != '' ">
+				<bind name="pattern" value="'%' + params.key + '%'" />
+					and (p.name like #{pattern} or j.name like #{pattern})
+				</if>
+			</where>
+		</if>
+	</select>
+
+	<!-- 删除手机屏蔽 -->
+	<delete id="delPhone" parameterType="int">
+		delete from plant_phone where id in
+		<foreach collection="array" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<!-- 插入手机屏蔽 -->
+	<insert id="insertPhone" parameterType="common.model.PlantPhone"> 
+        <selectKey keyProperty="id" resultType="String" order="BEFORE">
+            select nvl(max(TO_NUMBER(id)),0)+1 from plant_phone
+        </selectKey>
+        insert into plant_phone(id,name,code,status,region_id,pid,fid,in_time)  
+             values(#{id},#{name},#{code},#{status},#{regionId},#{pid},#{fid},#{inTime})  
+    </insert>
+    <!-- 按id查找手机屏蔽信息 -->
+    <select id="findPhoneById" parameterType="int" resultType="common.model.PlantPhone">
+    	SELECT *,region_id as regionId from plant_phone  where id = #{id}
+    </select>
+    <!-- 修改手机屏蔽数据 -->
+    <update id="updatePhone" parameterType="common.model.PlantPhone">
+    	update plant_phone 
+    	set name=#{name},status=#{status},fid=#{fid},pid=#{pid},in_time=#{inTime},code=#{code},region_id=#{regionId} 
+    	where id=#{id}
+    </update>
+</mapper>
