@@ -35,7 +35,7 @@
                     and p.status = #{params.status}
                 </if>
                 <if test="params.code != null and params.code != '' ">
-                    and substr(r.code,0,2) = #{params.code}
+                    and substr(r.code,3,2) = #{params.code}
                 </if>
                 <if test="params.key != null and params.key != '' ">
                     <bind name="pattern" value="'%' + params.key + '%'"/>
